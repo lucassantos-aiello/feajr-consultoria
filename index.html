@@ -42,6 +42,12 @@ section{padding:96px 0;}
 .rv3{opacity:0;transform:translateY(22px);transition:opacity .65s .3s ease,transform .65s .3s ease;}
 .rv3.in{opacity:1;transform:translateY(0);}
 
+/* FORM FEEDBACK ANIMATIONS */
+@keyframes shake{10%,90%{transform:translateX(-1px);}20%,80%{transform:translateX(2px);}30%,50%,70%{transform:translateX(-4px);}40%,60%{transform:translateX(4px);}}
+@keyframes spin{to{transform:rotate(360deg);}}
+.spinning{display:inline-block;animation:spin .8s linear infinite;}
+.hp-field{position:absolute!important;left:-9999px!important;width:1px;height:1px;overflow:hidden;}
+
 /* ── BUTTONS ── */
 .btn-orange{
   display:inline-flex;align-items:center;gap:10px;
@@ -544,6 +550,12 @@ section{padding:96px 0;}
 
       <form id="fform" novalidate>
 
+        <!-- Honeypot anti-spam: hidden from humans, bots tend to fill it -->
+        <div class="hp-field" aria-hidden="true">
+          <label>Não preencha este campo</label>
+          <input type="text" name="website" tabindex="-1" autocomplete="off">
+        </div>
+
         <!-- ETAPA 1: Estágio + Faturamento -->
         <div class="fstep active" data-step="1">
           <div class="ftitle">Qual é o estágio do seu negócio?</div>
@@ -967,16 +979,59 @@ window.prv = function(s){
   uiS(s-1);
 };
 
-const ff = document.getElementById('fform');
-if(ff) ff.addEventListener('submit', e=>{
-  e.preventDefault();
-  if(!val(4)) return;
+function showSuccess(){
   document.querySelectorAll('.fstep').forEach(x=>x.classList.remove('active'));
   const success = document.querySelector('.fsuccess');
   if(success) success.classList.add('active');
   document.querySelectorAll('.fdot').forEach(d=>{d.classList.remove('active');d.classList.add('done');});
   document.querySelectorAll('.fline').forEach(l=>l.classList.add('done'));
-  // INTEGRAÇÃO: enviar dados para webhook Make/CRM
+}
+
+function submitError(ff, btn, label){
+  if(btn){ btn.disabled=false; btn.style.opacity=''; btn.innerHTML = label; }
+  let msg = ff.querySelector('.fsubmit-error');
+  if(!msg){
+    msg = document.createElement('p');
+    msg.className='fsubmit-error';
+    msg.style.cssText='color:#ff6b2b;font-size:.85rem;margin-top:14px;font-weight:600;text-align:center;';
+    const step4 = ff.querySelector('.fstep[data-step="4"]');
+    if(step4) step4.appendChild(msg);
+  }
+  msg.textContent='Não foi possível enviar agora. Tente novamente em instantes ou fale conosco pelo WhatsApp.';
+}
+
+const ff = document.getElementById('fform');
+if(ff) ff.addEventListener('submit', async e=>{
+  e.preventDefault();
+  if(!val(4)) return;
+
+  const btn = ff.querySelector('.btn-fs');
+  const btnLabel = btn ? btn.innerHTML : '';
+  const old = ff.querySelector('.fsubmit-error');
+  if(old) old.remove();
+
+  // Collect fields; checkboxes (srv[]) become an array.
+  const fd = new FormData(ff);
+  const payload = { servicos: [] };
+  for(const [k,v] of fd.entries()){
+    if(k==='srv[]') payload.servicos.push(v);
+    else payload[k]=v;
+  }
+
+  if(btn){ btn.disabled=true; btn.style.opacity='.7';
+    btn.innerHTML='<i class="ph-bold ph-circle-notch spinning"></i> Enviando...'; }
+
+  try{
+    const r = await fetch('/api/pipefy',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(payload)
+    });
+    if(!r.ok) throw new Error('bad status '+r.status);
+    showSuccess();
+  }catch(err){
+    submitError(ff, btn, btnLabel);
+  }
 });
 </script>
 </body>

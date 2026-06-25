@@ -125,7 +125,7 @@ module.exports = async (req, res) => {
     col:      label("col", body.col),
     desafio:  demanda,
     inv:      label("inv", body.inv),
-    origem:   body.origem || "",
+    origem:   track.utm_source || body.origem || "", // utm_source da URL; senão o "Como nos encontrou"
     utm_campaign: track.utm_campaign || "",
     utm_term:     track.utm_term || "",
     utm_content:  track.utm_content || "",

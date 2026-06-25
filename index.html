@@ -430,8 +430,22 @@ section{padding:96px 0;}
 .soc:hover{background:var(--blue);border-color:var(--blue);color:white;}
 
 /* WA */
-.wa{position:fixed;bottom:24px;right:24px;z-index:99;width:56px;height:56px;background:#25d366;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(37,211,102,.4);transition:transform .2s;}
-.wa:hover{transform:scale(1.1);}
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(2,6,15,.78);
+  -webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);
+  display:flex;align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto;
+  opacity:0;visibility:hidden;transition:opacity .3s ease,visibility .3s ease;}
+.modal-overlay.open{opacity:1;visibility:visible;}
+.modal-box{position:relative;width:100%;max-width:980px;margin:auto;
+  transform:translateY(20px) scale(.98);transition:transform .35s cubic-bezier(.16,1,.3,1);}
+.modal-overlay.open .modal-box{transform:translateY(0) scale(1);}
+.modal-box .form-shell{margin:0;max-width:none;}
+.modal-close{position:absolute;top:-14px;right:-14px;z-index:3;width:42px;height:42px;border-radius:50%;
+  background:var(--orange);color:#fff;border:none;cursor:pointer;font-size:1.15rem;
+  display:flex;align-items:center;justify-content:center;box-shadow:0 4px 18px rgba(0,0,0,.4);
+  transition:background .2s,transform .2s;}
+.modal-close:hover{background:var(--orange2);transform:scale(1.08);}
+@media(max-width:560px){.modal-close{top:8px;right:8px;background:rgba(0,0,0,.55);}}
 
 /* RESPONSIVE */
 @media(max-width:960px){
@@ -498,7 +512,7 @@ section{padding:96px 0;}
   <div class="form-intro wrap">
     <div class="s-label rv"><i class="ph-bold ph-magnifying-glass"></i> Diagnóstico gratuito</div>
     <h2 class="rv">Realize o diagnóstico da sua empresa.<br><em>Identifique os principais gaps</em><br>que você precisa trabalhar.</h2>
-    <p class="rv2">Preencha o formulário abaixo. Nossa equipe entra em contato em até 48h com uma análise personalizada, sem compromisso.</p>
+    <p class="rv2">Clique no botão abaixo e responda algumas perguntas rápidas. Nossa equipe entra em contato em até 48h com uma análise personalizada, sem compromisso.</p>
   </div>
   <!-- SELLING POINT: Por que contratar uma EJ -->
   <div class="wrap">
@@ -519,8 +533,16 @@ section{padding:96px 0;}
   </div>
   </div>
 
-  <div class="wrap" style="margin-top:40px">
-  <div class="form-shell rv">
+  <div class="wrap" style="margin-top:40px;text-align:center">
+    <button type="button" class="btn-orange js-open-form">Solicitar diagnóstico gratuito <i class="ph-bold ph-arrow-right"></i></button>
+  </div>
+</section>
+
+<!-- ===== MODAL: FORMULÁRIO DE DIAGNÓSTICO ===== -->
+<div class="modal-overlay" id="leadModal" aria-hidden="true">
+  <div class="modal-box">
+    <button type="button" class="modal-close js-close-form" aria-label="Fechar formulário"><i class="ph-bold ph-x"></i></button>
+    <div class="form-shell">
     <div class="form-left-panel">
       <div>
         <h3>Excelência de<br><em>grande consultoria</em>,<br>a um valor acessível.</h3>
@@ -673,11 +695,10 @@ section{padding:96px 0;}
         </div>
 
       </form>
-      <!-- INTEGRAÇÃO: webhook Make/CRM — ver README -->
-    </div>
-  </div>
-  </div>
-</section>
+    </div><!-- /form-right-panel -->
+    </div><!-- /form-shell -->
+  </div><!-- /modal-box -->
+</div><!-- /modal-overlay -->
 
 <!-- ===== NÚMEROS ===== -->
 <section class="sec-nums" id="numeros">
@@ -856,10 +877,6 @@ section{padding:96px 0;}
   </div>
 </footer>
 
-<a href="https://wa.me/5511976867948?text=Gostaria%20de%20mais%20informa%C3%A7%C3%B5es%20sobre%20como%20a%20Fea%20Jr.%20pode%20Ajudar%20a%20minha%20empresa" class="wa" target="_blank" rel="noopener" aria-label="WhatsApp">
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="26" height="26" fill="white"><path d="M16 0C7.163 0 0 7.163 0 16c0 2.826.738 5.48 2.027 7.79L0 32l8.418-2.004A15.93 15.93 0 0016 32c8.837 0 16-7.163 16-16S24.837 0 16 0zm8.29 22.65c-.343.965-1.693 1.765-2.77 1.998-.74.158-1.708.284-4.963-1.067-4.166-1.72-6.852-5.95-7.063-6.226-.203-.276-1.71-2.278-1.71-4.346 0-2.068 1.083-3.083 1.466-3.5.383-.418.836-.523 1.115-.523.277 0 .555.003.797.015.256.013.599-.097.937.715.347.832 1.18 2.88 1.284 3.088.104.208.174.452.034.73-.14.278-.208.452-.416.696-.208.244-.437.546-.625.734-.208.208-.424.433-.183.85.243.416 1.08 1.782 2.317 2.887 1.591 1.417 2.932 1.856 3.348 2.065.416.208.659.174.903-.105.243-.278 1.045-1.22 1.323-1.637.278-.417.555-.347.938-.209.382.14 2.43 1.146 2.847 1.354.416.208.694.312.797.486.104.174.104 1.01-.24 1.975z"/></svg>
-</a>
-
 <script>
 // ── Capture ad / UTM params (first-touch, persisted across the multi-step form) ──
 const TRACK_KEYS=['utm_source','utm_medium','utm_campaign','utm_term','utm_content',
@@ -883,11 +900,22 @@ function getTracking(){
 const obs=new IntersectionObserver(e=>e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('in');}),{threshold:.07,rootMargin:'0px 0px -24px 0px'});
 document.querySelectorAll('.rv,.rv2,.rv3').forEach(el=>obs.observe(el));
 
+// ── LEAD MODAL ──
+const leadModal=document.getElementById('leadModal');
+function openModal(){ if(!leadModal)return; leadModal.classList.add('open'); leadModal.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden'; }
+function closeModal(){ if(!leadModal)return; leadModal.classList.remove('open'); leadModal.setAttribute('aria-hidden','true'); document.body.style.overflow=''; }
+
 document.querySelectorAll('a[href^="#"]').forEach(a=>a.addEventListener('click',e=>{
+  const href=a.getAttribute('href');
+  if(href==='#diagnostico'){ e.preventDefault(); openModal(); return; }
   e.preventDefault();
-  const t=document.querySelector(a.getAttribute('href'));
+  const t=document.querySelector(href);
   if(t)t.scrollIntoView({behavior:'smooth',block:'start'});
 }));
+document.querySelectorAll('.js-open-form').forEach(b=>b.addEventListener('click',openModal));
+document.querySelectorAll('.js-close-form').forEach(b=>b.addEventListener('click',closeModal));
+if(leadModal) leadModal.addEventListener('click',e=>{ if(e.target===leadModal) closeModal(); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
 
 // ── STEP UI ──
 function uiS(s){
@@ -904,8 +932,8 @@ function uiS(s){
   document.querySelectorAll('.fline').forEach((l,i)=>l.classList.toggle('done',i+1<s));
   // scroll form into view smoothly
   setTimeout(()=>{
-    const shell = document.querySelector('.form-shell');
-    if(shell){ shell.scrollIntoView({behavior:'smooth',block:'start'}); }
+    const panel = document.querySelector('.form-right-panel');
+    if(panel){ panel.scrollTo({top:0,behavior:'smooth'}); }
   },80);
 }
 
@@ -1016,7 +1044,7 @@ function submitError(ff, btn, label){
     const step4 = ff.querySelector('.fstep[data-step="4"]');
     if(step4) step4.appendChild(msg);
   }
-  msg.textContent='Não foi possível enviar agora. Tente novamente em instantes ou fale conosco pelo WhatsApp.';
+  msg.textContent='Não foi possível enviar agora. Por favor, tente novamente em instantes.';
 }
 
 const ff = document.getElementById('fform');

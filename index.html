@@ -861,6 +861,25 @@ section{padding:96px 0;}
 </a>
 
 <script>
+// ── Capture ad / UTM params (first-touch, persisted across the multi-step form) ──
+const TRACK_KEYS=['utm_source','utm_medium','utm_campaign','utm_term','utm_content',
+  'gclid','gbraid','wbraid','fbclid','msclkid','ttclid','gad_source'];
+(function(){
+  try{
+    const params=new URLSearchParams(window.location.search);
+    const stored=JSON.parse(sessionStorage.getItem('feajr_track')||'{}');
+    let changed=false;
+    TRACK_KEYS.forEach(k=>{
+      const v=params.get(k);
+      if(v && !stored[k]){ stored[k]=v; changed=true; } // first touch wins
+    });
+    if(changed) sessionStorage.setItem('feajr_track',JSON.stringify(stored));
+  }catch(e){}
+})();
+function getTracking(){
+  try{ return JSON.parse(sessionStorage.getItem('feajr_track')||'{}'); }catch(e){ return {}; }
+}
+
 const obs=new IntersectionObserver(e=>e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('in');}),{threshold:.07,rootMargin:'0px 0px -24px 0px'});
 document.querySelectorAll('.rv,.rv2,.rv3').forEach(el=>obs.observe(el));
 
@@ -1017,6 +1036,7 @@ if(ff) ff.addEventListener('submit', async e=>{
     if(k==='srv[]') payload.servicos.push(v);
     else payload[k]=v;
   }
+  payload.tracking = getTracking();
 
   if(btn){ btn.disabled=true; btn.style.opacity='.7';
     btn.innerHTML='<i class="ph-bold ph-circle-notch spinning"></i> Enviando...'; }

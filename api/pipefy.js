@@ -19,7 +19,12 @@ const FIELD_MAP = {
   col:      "num_funcionarios",  // Num. Funcionarios
   desafio:  "demanda",           // Demanda (inclui Estágio + Faturamento, que não têm campo próprio)
   inv:      "copy_of_demanda",   // Disposição a pagar
-  origem:   "origem",            // Origem
+  origem:   "origem",            // Origem (auto-relato "Como nos encontrou")
+  // ── Parâmetros de anúncios / UTM (capturados da URL) ──
+  utm_campaign: "campanha_de_origem",          // Campanha de Origem
+  utm_term:     "palavra_chave",               // Palavra Chave
+  utm_content:  "grupo_de_an_ncios_de_origem", // Grupo de Anúncios de Origem
+  gclid:        "copy_of_palavra_chave",       // GCLID (cai aqui também gbraid/wbraid)
   // estagio / fat: o pipe não tem campo dedicado — são incorporados ao campo "Demanda".
 };
 
@@ -107,6 +112,9 @@ module.exports = async (req, res) => {
     body.desafio ? `\nDesafio:\n${body.desafio}` : null,
   ].filter(Boolean).join("\n");
 
+  // Ad / UTM params captured from the URL on the client.
+  const track = (body.tracking && typeof body.tracking === "object") ? body.tracking : {};
+
   const values = {
     nome:     body.nome,
     email:    body.email,
@@ -118,6 +126,10 @@ module.exports = async (req, res) => {
     desafio:  demanda,
     inv:      label("inv", body.inv),
     origem:   body.origem || "",
+    utm_campaign: track.utm_campaign || "",
+    utm_term:     track.utm_term || "",
+    utm_content:  track.utm_content || "",
+    gclid:        track.gclid || track.gbraid || track.wbraid || "",
   };
 
   // Build fields_attributes only for fields that are mapped AND have a value.
